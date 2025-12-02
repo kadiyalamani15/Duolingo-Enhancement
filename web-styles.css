@@ -35,7 +35,7 @@ body {
 .phone-frame::before {
   content: '';
   position: absolute;
-  top: 20px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: 126px;
@@ -44,6 +44,7 @@ body {
   border-radius: 20px;
   z-index: 9999;
   pointer-events: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Home indicator */

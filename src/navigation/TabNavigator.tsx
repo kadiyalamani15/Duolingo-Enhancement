@@ -39,8 +39,8 @@ export const TabNavigator: React.FC = () => {
         tabBarInactiveTintColor: Colors.tabInactive,
         headerShown: false,
         tabBarStyle: {
-          height: 80,
-          paddingBottom: 20,
+          height: 90,
+          paddingBottom: 25,
           paddingTop: 10,
           borderTopWidth: 1,
           borderTopColor: Colors.border,
