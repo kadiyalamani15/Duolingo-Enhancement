@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../constants/Colors';
 import { Typography, Spacing, BorderRadius } from '../constants/Typography';
 import { ProgressBar } from '../components/ProgressBar';
 import { Button } from '../components/Button';
-import { Card } from '../components/Card';
+import { CultureCapsule } from '../components/CultureCapsule';
+import { LessonComplete } from '../components/LessonComplete';
+import { getCapsuleForLesson } from '../data/cultureCapsules';
+
+type LessonState = 'questions' | 'complete' | 'capsule';
 
 interface Question {
   id: string;
@@ -39,13 +44,19 @@ const mockQuestions: Question[] = [
 ];
 
 export const LessonScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
+  const [lessonState, setLessonState] = useState<LessonState>('questions');
 
   const question = mockQuestions[currentQuestion];
   const progress = (currentQuestion + 1) / mockQuestions.length;
+  const xpEarned = score * 10 + 5; // Base XP calculation
+
+  // Get culture capsule for this lesson (Unit 1 = lesson id '1')
+  const cultureCapsule = getCapsuleForLesson('1');
 
   const handleAnswerSelect = (answer: string) => {
     setSelectedAnswer(answer);
@@ -57,7 +68,7 @@ export const LessonScreen: React.FC = () => {
     const correct = selectedAnswer === question.correctAnswer;
     setIsCorrect(correct);
     if (correct) {
-      setScore(score + 10);
+      setScore(score + 1);
     }
   };
 
@@ -67,13 +78,26 @@ export const LessonScreen: React.FC = () => {
       setSelectedAnswer(null);
       setIsCorrect(null);
     } else {
-      // Lesson complete
-      alert(`Lesson Complete! Score: ${score + (isCorrect ? 10 : 0)} XP`);
+      // Lesson complete - show completion screen
+      setLessonState('complete');
     }
   };
 
+  const handleShowCapsule = () => {
+    setLessonState('capsule');
+  };
+
+  const handleCapsuleComplete = () => {
+    // Navigate back to Learn screen
+    navigation.goBack();
+  };
+
+  const handleClose = () => {
+    navigation.goBack();
+  };
+
   const getOptionStyle = (option: string) => {
-    if (!isCorrect && isCorrect !== null) {
+    if (isCorrect !== null) {
       // Answer was checked
       if (option === selectedAnswer) {
         return isCorrect ? styles.optionCorrect : styles.optionIncorrect;
@@ -88,11 +112,36 @@ export const LessonScreen: React.FC = () => {
     return styles.option;
   };
 
+  // Render Culture Capsule
+  if (lessonState === 'capsule') {
+    return (
+      <CultureCapsule
+        capsule={cultureCapsule}
+        onComplete={handleCapsuleComplete}
+        xpEarned={5}
+      />
+    );
+  }
+
+  // Render Lesson Complete
+  if (lessonState === 'complete') {
+    return (
+      <LessonComplete
+        score={score}
+        totalQuestions={mockQuestions.length}
+        xpEarned={xpEarned}
+        onContinue={handleShowCapsule}
+        hasCultureCapsule={true}
+      />
+    );
+  }
+
+  // Render Questions
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.closeButton}>
+        <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
           <Text style={styles.closeText}>✕</Text>
         </TouchableOpacity>
         <View style={styles.progressContainer}>
@@ -316,4 +365,3 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.border,
   },
 });
-
