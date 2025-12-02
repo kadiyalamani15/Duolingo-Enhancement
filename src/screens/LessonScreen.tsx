@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../constants/Colors';
 import { Typography, Spacing, BorderRadius } from '../constants/Typography';
 import { ProgressBar } from '../components/ProgressBar';
@@ -39,6 +40,7 @@ const mockQuestions: Question[] = [
 ];
 
 export const LessonScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -46,6 +48,24 @@ export const LessonScreen: React.FC = () => {
 
   const question = mockQuestions[currentQuestion];
   const progress = (currentQuestion + 1) / mockQuestions.length;
+
+  const handleExit = () => {
+    Alert.alert(
+      'Exit Lesson',
+      'Are you sure you want to quit? Your progress will be lost.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Exit',
+          onPress: () => navigation.goBack(),
+          style: 'destructive',
+        },
+      ]
+    );
+  };
 
   const handleAnswerSelect = (answer: string) => {
     setSelectedAnswer(answer);
@@ -68,7 +88,17 @@ export const LessonScreen: React.FC = () => {
       setIsCorrect(null);
     } else {
       // Lesson complete
-      alert(`Lesson Complete! Score: ${score + (isCorrect ? 10 : 0)} XP`);
+      const finalScore = score + (isCorrect ? 10 : 0);
+      Alert.alert(
+        'Lesson Complete! 🎉',
+        `You earned ${finalScore} XP!`,
+        [
+          {
+            text: 'Continue',
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
     }
   };
 
@@ -92,7 +122,7 @@ export const LessonScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.closeButton}>
+        <TouchableOpacity style={styles.closeButton} onPress={handleExit}>
           <Text style={styles.closeText}>✕</Text>
         </TouchableOpacity>
         <View style={styles.progressContainer}>
