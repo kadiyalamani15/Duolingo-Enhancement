@@ -1,6 +1,6 @@
 import React from 'react';
-import { Text } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LearnScreen } from '../screens/LearnScreen';
 import { PracticeScreen } from '../screens/PracticeScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
@@ -11,27 +11,31 @@ import { Typography } from '../constants/Typography';
 
 const Tab = createBottomTabNavigator();
 
-const getTabIcon = (routeName: string, focused: boolean) => {
-  const iconMap: { [key: string]: string } = {
-    Learn: '🏠',
-    Practice: '🎯',
-    Leaderboard: '🏆',
-    Shop: '🛒',
-    Profile: '👤',
-  };
-
-  return iconMap[routeName] || '•';
-};
-
 export const TabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          const icon = getTabIcon(route.name, focused);
-          return <Text style={{ fontSize: 24 }}>{icon}</Text>;
+          let iconName: any;
+
+          if (route.name === 'Learn') {
+            iconName = focused ? 'home' : 'home-outline';
+            return <Ionicons name={iconName} size={28} color={color} />;
+          } else if (route.name === 'Practice') {
+            iconName = focused ? 'dumbbell' : 'dumbbell';
+            return <MaterialCommunityIcons name={iconName} size={28} color={color} />;
+          } else if (route.name === 'Leaderboard') {
+            iconName = focused ? 'trophy' : 'trophy-outline';
+            return <Ionicons name={iconName} size={28} color={color} />;
+          } else if (route.name === 'Shop') {
+            iconName = focused ? 'cart' : 'cart-outline';
+            return <Ionicons name={iconName} size={28} color={color} />;
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person' : 'person-outline';
+            return <Ionicons name={iconName} size={28} color={color} />;
+          }
         },
-        tabBarActiveTintColor: Colors.tabActive,
+        tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.tabInactive,
         headerShown: false,
         tabBarStyle: {
