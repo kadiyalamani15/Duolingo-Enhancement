@@ -13,11 +13,11 @@ import { Card } from '../components/Card';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const mockLessons = [
-  { id: '1', title: 'Unit 1', isCompleted: true, isLocked: false, isCurrent: false },
-  { id: '2', title: 'Unit 2', isCompleted: true, isLocked: false, isCurrent: false },
-  { id: '3', title: 'Unit 3', isCompleted: false, isLocked: false, isCurrent: true },
-  { id: '4', title: 'Unit 4', isCompleted: false, isLocked: true, isCurrent: false },
-  { id: '5', title: 'Unit 5', isCompleted: false, isLocked: true, isCurrent: false },
+  { id: '1', title: 'Greetings', subtitle: 'Basics', isCompleted: false, isLocked: false, isCurrent: true },
+  { id: '2', title: 'Objects', subtitle: 'Daily Items', isCompleted: false, isLocked: false, isCurrent: false },
+  { id: '3', title: 'Places', subtitle: 'Directions', isCompleted: false, isLocked: false, isCurrent: false },
+  { id: '4', title: 'Unit 4', subtitle: 'Coming Soon', isCompleted: false, isLocked: true, isCurrent: false },
+  { id: '5', title: 'Unit 5', subtitle: 'Coming Soon', isCompleted: false, isLocked: true, isCurrent: false },
 ];
 
 export const LearnScreen: React.FC = () => {
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   },
   languageTitle: {
     fontSize: Typography.xxl,
-    fontWeight: Typography.bold,
+    fontWeight: '700' as const,
     color: Colors.textPrimary,
   },
   languageSubtitle: {
@@ -110,12 +110,12 @@ const styles = StyleSheet.create({
   },
   progressTitle: {
     fontSize: Typography.base,
-    fontWeight: Typography.semiBold,
+    fontWeight: '600' as const,
     color: Colors.textPrimary,
   },
   progressValue: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontWeight: '700' as const,
     color: Colors.primary,
   },
   pathContainer: {

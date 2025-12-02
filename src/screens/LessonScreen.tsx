@@ -1,62 +1,40 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Colors } from '../constants/Colors';
 import { Typography, Spacing, BorderRadius } from '../constants/Typography';
 import { ProgressBar } from '../components/ProgressBar';
 import { Button } from '../components/Button';
 import { CultureCapsule } from '../components/CultureCapsule';
 import { LessonComplete } from '../components/LessonComplete';
-import { getCapsuleForLesson } from '../data/cultureCapsules';
+import { getCapsuleById } from '../data/cultureCapsules';
+import { getLessonById, LessonData } from '../data/lessonContent';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
 type LessonState = 'questions' | 'complete' | 'capsule';
-
-interface Question {
-  id: string;
-  type: 'multiple-choice' | 'translate' | 'listen';
-  question: string;
-  options?: string[];
-  correctAnswer: string;
-}
-
-const mockQuestions: Question[] = [
-  {
-    id: '1',
-    type: 'multiple-choice',
-    question: 'Select the correct translation:\n\n"Hello"',
-    options: ['Hola', 'Adiós', 'Gracias', 'Por favor'],
-    correctAnswer: 'Hola',
-  },
-  {
-    id: '2',
-    type: 'multiple-choice',
-    question: 'What does "Gracias" mean?',
-    options: ['Please', 'Thank you', 'Goodbye', 'Hello'],
-    correctAnswer: 'Thank you',
-  },
-  {
-    id: '3',
-    type: 'translate',
-    question: 'Translate this:\n\n"Good morning"',
-    options: ['Buenos días', 'Buenas noches', 'Buenas tardes', 'Hasta luego'],
-    correctAnswer: 'Buenos días',
-  },
-];
+type LessonScreenRouteProp = RouteProp<RootStackParamList, 'Lesson'>;
 
 export const LessonScreen: React.FC = () => {
   const navigation = useNavigation();
+  const route = useRoute<LessonScreenRouteProp>();
+  const { lessonId } = route.params;
+  
+  // Get lesson data based on lessonId
+  const lessonData = getLessonById(lessonId) || getLessonById('1')!;
+  const questions = lessonData.questions;
+  
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [lessonState, setLessonState] = useState<LessonState>('questions');
 
-  const question = mockQuestions[currentQuestion];
-  const progress = (currentQuestion + 1) / mockQuestions.length;
-  const xpEarned = score * 10 + 5; // Base XP calculation
+  const question = questions[currentQuestion];
+  const progress = (currentQuestion + 1) / questions.length;
+  const xpEarned = score * 10 + 5;
 
-  // Get culture capsule for this lesson (Unit 1 = lesson id '1')
-  const cultureCapsule = getCapsuleForLesson('1');
+  // Get culture capsule for this lesson
+  const cultureCapsule = getCapsuleById(lessonData.cultureCapsuleId)!;
 
   const handleAnswerSelect = (answer: string) => {
     setSelectedAnswer(answer);
@@ -73,12 +51,11 @@ export const LessonScreen: React.FC = () => {
   };
 
   const handleContinue = () => {
-    if (currentQuestion < mockQuestions.length - 1) {
+    if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setIsCorrect(null);
     } else {
-      // Lesson complete - show completion screen
       setLessonState('complete');
     }
   };
@@ -88,7 +65,6 @@ export const LessonScreen: React.FC = () => {
   };
 
   const handleCapsuleComplete = () => {
-    // Navigate back to Learn screen
     navigation.goBack();
   };
 
@@ -98,7 +74,6 @@ export const LessonScreen: React.FC = () => {
 
   const getOptionStyle = (option: string) => {
     if (isCorrect !== null) {
-      // Answer was checked
       if (option === selectedAnswer) {
         return isCorrect ? styles.optionCorrect : styles.optionIncorrect;
       }
@@ -110,6 +85,15 @@ export const LessonScreen: React.FC = () => {
       return styles.optionSelected;
     }
     return styles.option;
+  };
+
+  const getDifficultyColor = () => {
+    switch (lessonData.difficulty) {
+      case 'beginner': return Colors.success;
+      case 'elementary': return Colors.xp;
+      case 'intermediate': return Colors.streak;
+      default: return Colors.primary;
+    }
   };
 
   // Render Culture Capsule
@@ -128,7 +112,7 @@ export const LessonScreen: React.FC = () => {
     return (
       <LessonComplete
         score={score}
-        totalQuestions={mockQuestions.length}
+        totalQuestions={questions.length}
         xpEarned={xpEarned}
         onContinue={handleShowCapsule}
         hasCultureCapsule={true}
@@ -149,6 +133,15 @@ export const LessonScreen: React.FC = () => {
         </View>
         <View style={styles.heartsContainer}>
           <Text style={styles.heartsText}>❤️ 5</Text>
+        </View>
+      </View>
+
+      {/* Unit Info Badge */}
+      <View style={styles.unitBadgeContainer}>
+        <View style={[styles.unitBadge, { backgroundColor: getDifficultyColor() + '20' }]}>
+          <Text style={[styles.unitBadgeText, { color: getDifficultyColor() }]}>
+            {lessonData.unitTitle} • {lessonData.topic}
+          </Text>
         </View>
       </View>
 
@@ -256,7 +249,20 @@ const styles = StyleSheet.create({
   },
   heartsText: {
     fontSize: Typography.base,
-    fontWeight: Typography.bold,
+    fontWeight: '700' as const,
+  },
+  unitBadgeContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.sm,
+  },
+  unitBadge: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
+  },
+  unitBadgeText: {
+    fontSize: Typography.sm,
+    fontWeight: '600' as const,
   },
   content: {
     flex: 1,
@@ -264,8 +270,8 @@ const styles = StyleSheet.create({
   },
   questionContainer: {
     alignItems: 'center',
-    marginTop: Spacing.xl,
-    marginBottom: Spacing.xxxl,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.xl,
   },
   questionTypeIcon: {
     width: 80,
@@ -280,18 +286,19 @@ const styles = StyleSheet.create({
     fontSize: 40,
   },
   questionText: {
-    fontSize: Typography.xxl,
-    fontWeight: Typography.bold,
+    fontSize: Typography.xl,
+    fontWeight: '700' as const,
     color: Colors.textPrimary,
     textAlign: 'center',
-    lineHeight: 32,
+    lineHeight: 30,
   },
   optionsContainer: {
-    marginTop: Spacing.lg,
+    marginTop: Spacing.md,
   },
   optionCard: {
     marginBottom: Spacing.md,
     paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     backgroundColor: Colors.white,
     borderRadius: BorderRadius.lg,
     borderWidth: 2,
@@ -313,8 +320,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.error + '10',
   },
   optionText: {
-    fontSize: Typography.lg,
-    fontWeight: Typography.semiBold,
+    fontSize: Typography.base,
+    fontWeight: '600' as const,
     color: Colors.textPrimary,
     textAlign: 'center',
   },
@@ -350,7 +357,7 @@ const styles = StyleSheet.create({
   },
   feedbackTitle: {
     fontSize: Typography.xl,
-    fontWeight: Typography.bold,
+    fontWeight: '700' as const,
     color: Colors.textPrimary,
   },
   feedbackAnswer: {
