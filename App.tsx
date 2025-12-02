@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     maxWidth: '100vw',
     maxHeight: '100vh',
     backgroundColor: Colors.white,
-    borderRadius: 50,
+    borderRadius: 60,
     overflow: 'hidden',
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
     position: 'relative',
