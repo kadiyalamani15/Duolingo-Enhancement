@@ -2,13 +2,14 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Typography, Spacing } from '../constants/Typography';
-import { StatItem } from './StatItem';
 
 interface HeaderProps {
   streak?: number;
   gems?: number;
   hearts?: number;
   showStats?: boolean;
+  showListenIn?: boolean;
+  onListenInPress?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +17,8 @@ export const Header: React.FC<HeaderProps> = ({
   gems = 0,
   hearts = 5,
   showStats = true,
+  showListenIn = false,
+  onListenInPress,
 }) => {
   return (
     <View style={styles.container}>
@@ -23,6 +26,18 @@ export const Header: React.FC<HeaderProps> = ({
         <TouchableOpacity style={styles.avatarContainer}>
           <Text style={styles.avatarEmoji}>👤</Text>
         </TouchableOpacity>
+        
+        {/* Listen In Button */}
+        {showListenIn && (
+          <TouchableOpacity 
+            style={styles.listenInButton}
+            onPress={onListenInPress}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.listenInIcon}>💬</Text>
+            <Text style={styles.listenInText}>Listen In</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {showStats && (
@@ -75,6 +90,26 @@ const styles = StyleSheet.create({
   avatarEmoji: {
     fontSize: 24,
   },
+  listenInButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    backgroundColor: Colors.secondary + '15',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.secondary,
+  },
+  listenInIcon: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  listenInText: {
+    fontSize: Typography.xs,
+    fontWeight: '700' as const,
+    color: Colors.secondary,
+  },
   statsSection: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -82,7 +117,7 @@ const styles = StyleSheet.create({
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: Spacing.base,
+    marginLeft: Spacing.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     backgroundColor: Colors.backgroundGray,
@@ -96,8 +131,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: Typography.sm,
-    fontWeight: Typography.bold,
+    fontWeight: '700' as const,
     color: Colors.textPrimary,
   },
 });
-

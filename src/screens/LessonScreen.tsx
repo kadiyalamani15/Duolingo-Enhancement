@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Platform, Modal } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Colors } from '../constants/Colors';
 import { Typography, Spacing, BorderRadius } from '../constants/Typography';
@@ -28,6 +28,7 @@ export const LessonScreen: React.FC = () => {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [lessonState, setLessonState] = useState<LessonState>('questions');
+  const [showExitModal, setShowExitModal] = useState(false);
 
   const question = questions[currentQuestion];
   const progress = (currentQuestion + 1) / questions.length;
@@ -37,21 +38,16 @@ export const LessonScreen: React.FC = () => {
   const cultureCapsule = getCapsuleById(lessonData.cultureCapsuleId)!;
 
   const handleExit = () => {
-    Alert.alert(
-      'Exit Lesson',
-      'Are you sure you want to quit? Your progress will be lost.',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Exit',
-          onPress: () => navigation.goBack(),
-          style: 'destructive',
-        },
-      ]
-    );
+    setShowExitModal(true);
+  };
+
+  const confirmExit = () => {
+    setShowExitModal(false);
+    navigation.goBack();
+  };
+
+  const cancelExit = () => {
+    setShowExitModal(false);
   };
 
   const handleAnswerSelect = (answer: string) => {
@@ -137,6 +133,37 @@ export const LessonScreen: React.FC = () => {
   // Render Questions
   return (
     <SafeAreaView style={styles.container}>
+      {/* Exit Confirmation Modal */}
+      <Modal
+        visible={showExitModal}
+        transparent
+        animationType="fade"
+        onRequestClose={cancelExit}
+      >
+        <View style={styles.exitModalOverlay}>
+          <View style={styles.exitModalContent}>
+            <Text style={styles.exitModalTitle}>Exit Lesson?</Text>
+            <Text style={styles.exitModalMessage}>
+              Are you sure you want to quit? Your progress will be lost.
+            </Text>
+            <View style={styles.exitModalButtons}>
+              <TouchableOpacity 
+                style={styles.exitModalCancelButton} 
+                onPress={cancelExit}
+              >
+                <Text style={styles.exitModalCancelText}>Keep Learning</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.exitModalExitButton} 
+                onPress={confirmExit}
+              >
+                <Text style={styles.exitModalExitText}>Exit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.closeButton} onPress={handleExit}>
@@ -384,5 +411,65 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
+  },
+  // Exit Modal Styles
+  exitModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  exitModalContent: {
+    backgroundColor: Colors.white,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    width: '100%',
+    maxWidth: 300,
+    alignItems: 'center',
+  },
+  exitModalTitle: {
+    fontSize: Typography.xl,
+    fontWeight: '700' as const,
+    color: Colors.textPrimary,
+    marginBottom: Spacing.sm,
+  },
+  exitModalMessage: {
+    fontSize: Typography.base,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+    lineHeight: 22,
+  },
+  exitModalButtons: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    width: '100%',
+  },
+  exitModalCancelButton: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+  },
+  exitModalCancelText: {
+    color: Colors.white,
+    fontSize: Typography.sm,
+    fontWeight: '700' as const,
+  },
+  exitModalExitButton: {
+    flex: 1,
+    backgroundColor: Colors.backgroundGray,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.border,
+  },
+  exitModalExitText: {
+    color: Colors.error,
+    fontSize: Typography.sm,
+    fontWeight: '700' as const,
   },
 });

@@ -27,9 +27,19 @@ export const LearnScreen: React.FC = () => {
     navigation.navigate('Lesson', { lessonId });
   };
 
+  const handleListenInPress = () => {
+    navigation.navigate('ListenIn');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Header streak={7} gems={500} hearts={5} />
+      <Header 
+        streak={7} 
+        gems={500} 
+        hearts={5} 
+        showListenIn={true}
+        onListenInPress={handleListenInPress}
+      />
       
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Language Header */}
@@ -145,4 +155,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-
